@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CV Editor — Minimal One Page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Lora:wght@400;600;700&family=Merriweather:wght@400;700&family=Noto+Sans+Arabic:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700;800&family=Roboto:wght@400;500;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style id="baked-cv"></style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-scroll" id="sidebarScroll" dir="ltr">
+
+      <div class="brand">
+        <div class="logo">CV</div>
+        <div>
+          <h1 data-i18n="appTitle">CV Editor</h1>
+          <p data-i18n="appSub">Minimal, one-page resume</p>
+        </div>
+      </div>
+
+      <section class="block">
+        <h2 data-i18n="appearance">Appearance</h2>
+        <button class="btn" id="themeBtn"></button>
+        <label data-i18n="language">Language</label>
+        <select id="langSel">
+          <option value="en">English</option>
+          <option value="ar">العربية</option>
+          <option value="fr">Français</option>
+          <option value="es">Español</option>
+          <option value="de">Deutsch</option>
+        </select>
+        <label data-i18n="direction">Direction</label>
+        <div class="seg" id="dirSeg">
+          <button data-dir="ltr" class="active">LTR</button>
+          <button data-dir="rtl">RTL</button>
+        </div>
+        <button class="btn ghost" id="sampleBtn" style="margin-top:10px"></button>
+      </section>
+
+      <section class="block">
+        <h2 data-i18n="design">Design</h2>
+        <label data-i18n="font">Font</label>
+        <select id="f-font"></select>
+        <div class="row-lab"><span data-i18n="fontSize">Font size</span><b id="fontSizeVal">11 pt</b></div>
+        <input id="f-fontsize" type="range" min="8" max="16" step="0.5" value="11">
+        <div class="row-lab"><span data-i18n="lineHeight">Line height</span><b id="lineHeightVal">1.50</b></div>
+        <input id="f-lineheight" type="range" min="1.2" max="1.9" step="0.05" value="1.5">
+        <label data-i18n="autoFit">Fit to one page</label>
+        <div class="seg" id="fitSeg">
+          <button data-fit="on" class="active" data-i18n="autoFitOn">On</button>
+          <button data-fit="off" data-i18n="autoFitOff">Off</button>
+        </div>
+        <label data-i18n="themeColors">Theme colors</label>
+        <p class="theme-edit-label" id="colorThemeLabel"></p>
+        <div class="palette-dots" id="paletteDots"></div>
+        <div id="colorList"></div>
+        <button class="btn ghost" id="resetColorsBtn" style="margin-top:8px"></button>
+        <label data-i18n="sectionStyles">Section styles</label>
+        <div id="sectionStyleList"></div>
+      </section>
+
+      <section class="block">
+        <h2 data-i18n="personal">Personal details</h2>
+        <label data-i18n="fullName">Full name</label>
+        <input id="f-name" type="text" value="Alex Morgan">
+        <label data-i18n="jobTitle">Job title</label>
+        <input id="f-title" type="text" value="Senior Frontend Developer">
+      </section>
+
+      <section class="block">
+        <h2 data-i18n="contact">Contact</h2>
+        <label data-i18n="email">Email</label>
+        <input id="f-email" type="text" value="alex.morgan@email.com">
+        <label data-i18n="phone">Phone</label>
+        <input id="f-phone" type="text" value="+1 555 018 2245">
+        <label data-i18n="location">Location</label>
+        <input id="f-location" type="text" value="San Francisco, CA">
+        <label data-i18n="website">Website</label>
+        <input id="f-website" type="text" value="alexmorgan.dev">
+      </section>
+
+      <section class="block">
+        <h2 data-i18n="summary">Summary</h2>
+        <textarea id="f-summary" data-i18n-ph="summaryPh">Frontend developer with 8+ years of experience building fast, accessible and scalable web products. Passionate about design systems, performance and clean architecture.</textarea>
+        <p class="hint" data-i18n="syntaxHint">Format: # Title · ## Subtitle · --- divider · - bullet</p>
+      </section>
+
+      <section class="block">
+        <h2 data-i18n="experience">Experience</h2>
+        <div id="expList"></div>
+        <button class="btn ghost" id="addExp"></button>
+      </section>
+
+      <section class="block">
+        <h2 data-i18n="education">Education</h2>
+        <div id="eduList"></div>
+        <button class="btn ghost" id="addEdu"></button>
+      </section>
+
+      <section class="block">
+        <h2 data-i18n="skills">Skills & Languages</h2>
+        <label data-i18n="skills">Skills</label>
+        <input id="f-skills" type="text" value="JavaScript, TypeScript, React, Vue, Node.js, CSS Architecture, Accessibility, Testing">
+        <p class="hint" data-i18n="skillsHint">Comma separated</p>
+        <label data-i18n="languages">Languages</label>
+        <input id="f-langs" type="text" value="English (Native), Spanish (Fluent), French (Basic)">
+        <p class="hint" data-i18n="languagesHint">Comma separated</p>
+      </section>
+
+      <section class="block">
+        <h2 data-i18n="custom">Custom sections</h2>
+        <div id="customList"></div>
+        <button class="btn ghost" id="addCustom"></button>
+        <p class="hint" data-i18n="customHint">Add any section (Projects, Awards, Volunteering…).</p>
+      </section>
+
+      <section class="block">
+        <h2 data-i18n="export">Export</h2>
+        <div class="btn-row">
+          <button class="btn" id="pdfBtn"></button>
+          <button class="btn" id="docxBtn"></button>
+        </div>
+        <button class="btn" id="printBtn" style="margin-top:8px"></button>
+        <p class="hint" data-i18n="pdfHint">PDF and DOCX keep your fonts, sizes, section colors and the current light or dark theme.</p>
+      </section>
+
+    </div>
+
+    <div class="sidebar-footer" id="sidebarFooter" dir="ltr">
+      <button class="btn primary big" id="newWindowBtn"></button>
+      <div class="footer-note">
+        <span data-i18n="preview">Live preview</span>
+        <span data-i18n="onePage">Always 1 page</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="page" id="page">
+      <div class="cv" id="cv"></div>
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
